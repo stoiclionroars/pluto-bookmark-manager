@@ -1,8 +1,32 @@
 
-use iced::{Color, Element, color, theme::Mode, widget::{Column, Row, button, column, container, row, text}};
+use iced::{Color, Task, application, widget::{Column, Row, text}};
 
-pub fn main() -> iced::Result {
-    iced::run(Model::update, Model::view)
+fn initialize_data() -> Vec<Bookmark> {
+    let mut v = Vec::new();
+    v.push(
+        Bookmark{
+            id: "x-g-9-e".to_string(),
+            name: "google".to_string(), 
+            description: "a search engine enhanced with IA.".to_string(), 
+            link: "https://www.google.com".to_string()
+        }
+    );
+    v.push(
+        Bookmark{
+            id: "u-y-8-a".to_string(),
+            name: "ChatGPT".to_string(), 
+            description: "an IA platform".to_string(), 
+            link: "https://www.chatgpt.com".to_string()
+        }
+    ); 
+    v
+}
+pub fn main() -> iced::Result {    
+    application(
+        move || (Model { bookmarks: initializeData()}, Task::none()), 
+        update, 
+        view,
+    ).title("Pluto Bookmark Manager").run()
 }
 
 /// The struct contains all the data of the application. 
@@ -28,27 +52,19 @@ enum Message {
 }
 
 
-impl Model {
-
-    fn update(&mut self, message: Message) {
-        match message {
-            Message::Add(bookmark) => {
-                self.bookmarks.push(bookmark);
-            }
-            Message::Remove(index) => {
-                self.bookmarks.remove(index);
-            }
+fn update(model: &mut Model, message: Message) -> Task<Message> {
+    match message {
+        Message::Add(bookmark) => {
+            model.bookmarks.push(bookmark);
+        }
+        Message::Remove(index) => {
+            model.bookmarks.remove(index);
         }
     }
+    Task::none()
+}
 
-    //Column::new()
-    //   .push(headers)
-    //   .extend(content_rows)
-    //   .push(new_row)
-    //   .height(Length::Shrink)
-    //   .into()
-
-    fn view(&self) -> Column<'_,Message> {  
+fn view(model: &Model) -> Column<'_,Message> {  
         //let mut items: Vec<Column<'_, Message>> = Vec::new();
         //for (index, bookmark) in self.bookmarks.iter().enumerate() {
         //    items.push(
@@ -56,25 +72,8 @@ impl Model {
         //        
         //    );
         //}    
-        let mut v = Vec::new();
-        v.push(
-            Bookmark{
-                id: "x-g-9-e".to_string(),
-                name: "google".to_string(), 
-                description: "a search engine enhanced with IA.".to_string(), 
-                link: "https://www.google.com".to_string()
-            }
-        );
-        v.push(
-            Bookmark{
-                id: "u-y-8-a".to_string(),
-                name: "ChatGPT".to_string(), 
-                description: "an IA platform".to_string(), 
-                link: "https://www.chatgpt.com".to_string()
-            }
-        );
-        let rows = //&self.bookmarks
-        v.iter()
+        
+        let rows = model.bookmarks.iter()
         .enumerate()
         .map(|(_i,r)| {
             Row::new()
@@ -87,6 +86,9 @@ impl Model {
             .into()
         });
         Column::new().extend(rows.clone().into_iter()).push(text("Hello World!"))
-    }
-
-}
+    }//Column::new()
+    //   .push(headers)
+    //   .extend(content_rows)
+    //   .push(new_row)
+    //   .height(Length::Shrink)
+    //   .into()
